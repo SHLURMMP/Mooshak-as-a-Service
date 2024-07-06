@@ -1,0 +1,85 @@
+.Page {
+    padding-top: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100vh;
+    min-height: 735px;
+    background-color:#fff3c4;
+}
+
+.TeamTable.table-bordered {
+    border:3px solid aquamarine;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.TeamTable.table-bordered > thead > tr > th{
+    border:3px solid aquamarine;
+}
+.TeamTable.table-bordered > tbody > tr > td{
+    border:3px solid aquamarine;
+}
+
+.ContestTable.table-bordered {
+    border:3px solid aquamarine;
+    margin-top:20px;
+}
+.ContestTable.table-bordered > thead > tr > th{
+    border:3px solid aquamarine;
+}
+.ContestTable.table-bordered > tbody > tr > td{
+    border:3px solid aquamarine;
+}
+
+.btn-primary {
+    color: black;
+    background-color:  #7fffd4;
+    border-color: #7fffd4; 
+    margin-left: 2px;
+    margin-right: 2px;
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .open>.dropdown-toggle.btn-primary{
+    color: black;
+    background-color: #35ffbc;
+    border-color: #35ffbc;
+}
+.btn-primary:not(:disabled):not(.disabled).active, 
+    .btn-primary:not(:disabled):not(.disabled):active, 
+    .show>.btn-primary.dropdown-toggle{
+        color: black;
+        background-color: #a2f7db;
+        border-color: #a2f7db;
+}
+
+.btn.btn-primary[disabled] {
+    color: black;
+    background-color:  #6cdab5;
+    border-color: #6cdab5;
+}
+
+.InfoSection{
+    margin-bottom: 20px;
+    margin-left: 30%;
+    margin-right: 30%;
+    border-radius: 5px;
+}
+.InfoBlock{
+    margin-bottom: 10px;
+    border-radius: 5px;
+    margin-left: 4px;
+    border:3px solid #7fffff;
+    background-color :#7fffff;
+}
+.InfoLabel{
+    margin-left: 4px;
+    display:inline-block;
+}
+
+.form-group{
+    padding-left: 35%;
+    padding-right: 35%;
+}

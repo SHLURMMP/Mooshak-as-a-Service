@@ -1,0 +1,22 @@
+- hosts: all
+
+  tasks:
+    #- name: Edit Contest Attributes
+    #  become: true
+    #  ansible.builtin.copy:
+    #    src: /home/pedro/MAAS/backend/terraform_scripts/ansible/contest_template/.data.tcl
+    #    dest: /home/mooshak/data/contests/contest_template/.data.tcl
+
+    - name: Edit Contest Name
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/.data.tcl
+          regexp: '^(.*)set  Designation(.*)$' 
+          line: "set  Designation {{'{'}}{{title}}{{'}'}}"
+    
+    - name: Edit Contest Description
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/.data.tcl
+          regexp: '^(.*)set        Notes(.*)$' 
+          line: "set        Notes {{'{'}}{{description}}{{'}'}}"

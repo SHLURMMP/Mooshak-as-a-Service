@@ -1,0 +1,269 @@
+- hosts: all
+#aws_ec2
+
+  vars:
+    default_contests:
+      - /home/mooshak/data/contests/proto_ioi
+      - /home/mooshak/data/contests/proto_service
+      - /home/mooshak/data/contests/proto_quiz
+      - /home/mooshak/data/contests/proto_extend
+      - /home/mooshak/data/contests/proto_short
+      - /home/mooshak/data/contests/proto_icpc
+    
+    #admin_password: admin 
+    #judge_password: judge
+  
+  tasks:
+    - name: Update
+      become: true
+      ansible.builtin.apt:
+        update_cache: yes
+
+#    - name: Upgrade
+#      become: true
+#      ansible.builtin.apt:
+#        upgrade: safe
+    
+    - name: Install required software
+      become: true
+      apt:
+        name: 
+          - gcc
+          - make
+          - tcl
+          - apache2
+          - apache2-suexec-pristine
+          - xsltproc
+          - lpr
+          - rsync
+          - libxml2-utils
+        state: latest
+
+    - name: Enable apache directories
+      become: true
+      shell: |
+        cd /etc/apache2/mods-enabled
+        sudo ln -s ../mods-available/userdir.conf
+        sudo ln -s ../mods-available/userdir.load
+        sudo ln -s ../mods-available/suexec.load
+        sudo ln -s ../mods-available/cgi.load
+
+
+    - name: Edit apache configurations 
+      become: true
+      shell: |
+        cd /etc/apache2/mods-enabled
+        sudo chmod 755 userdir.conf
+        echo '' >> userdir.conf
+        echo '<IfModule mod_userdir.c>\n	UserDir public_html\n        UserDir disabled root\n        <Directory /home/*/public_html>\n                AllowOverride FileInfo AuthConfig Limit Indexes\n                Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec\n                Require method GET POST OPTIONS\n        </Directory>\n        <Directory /home/*/public_html/cgi-bin>\n                Options +ExecCGI -Includes -Indexes\n                SetHandler cgi-script\n                Order allow,deny\n                Allow from all\n        </Directory>\n</IfModule>' >> userdir.conf
+
+    - name: Restart Apache
+      become: true
+      shell: apache2ctl graceful
+
+    - name: Download Mooshak
+      become: true
+      ansible.builtin.get_url:
+        url: https://mooshak.dcc.fc.up.pt/download/mooshak-1.6.6.tgz
+        dest: /home/ubuntu
+
+    - name: Extract Mooshak
+      become: true
+      shell: |
+        tar xzf mooshak-1.6.6.tgz
+    
+    - name: Install Mooshak
+      become: true
+      shell: |
+        cd mooshak-1.6.6 
+        ./install 
+    
+    - name: Delete Default Contests
+      become: true
+      ansible.builtin.file:
+        path: "{{item}}"
+        state: absent
+      loop: "{{default_contests}}"
+
+    - name: Generate Admin Password
+      become: true
+      shell: |
+        cd /home/mooshak/bin
+        ./pass "{{admin_password}}"
+      register: hash_password_admin
+
+    - name: Store Admin Password
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/configs/users/admin/.data.tcl
+          regexp: '^(.*)set     Password(.*)$' 
+          line: "set     Password {{hash_password_admin.stdout}}"
+          owner: mooshak
+          group: mooshak
+      #shell: |
+      #  cd /home/mooshak/data/configs/users/admin
+      #  echo '' >> .data.tcl
+      #  echo 'set         Name admin\nset     Password "{{hash_password_admin.stdout}}"\nset      Profile admin' >> .data.tcl
+    
+    - name: Change Judge Password
+      become: true
+      shell: |
+        cd /home/mooshak/bin
+        ./pass "{{judge_password}}"
+      register: hash_password_judge
+
+    - name: Store Judge Password
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/configs/users/judge/.data.tcl
+          regexp: '^(.*)set     Password(.*)$' 
+          line: "set     Password {{hash_password_judge.stdout}}"
+          owner: mooshak
+          group: mooshak
+      #shell: |
+      #  cd /home/mooshak/data/configs/users/judge
+      #  echo '' >> .data.tcl
+      #  echo 'set         Name judge\nset     Password "{{hash_password_judge.stdout}}"\nset      Profile judge' >> .data.tcl
+
+    - name: Create Contest
+      become: true
+      ansible.builtin.copy:
+        src: /home/pedro/MAAS/backend/terraform_scripts/ansible/contest_template
+        dest: /home/mooshak/data/contests
+        mode: '0755'
+        owner: mooshak
+        group: mooshak
+    
+    #- name: Enable Contest
+    #  become: true
+    #  shell: |
+    #    cd /home/mooshak/data/contests
+    #    sudo chmod 755 contest_template
+
+    #- name: Enable Contest Folders
+    #  become: true
+    #  ansible.builtin.file:
+    #    dest: "/home/mooshak/data/contests/contest_template"
+    #    recurse: true 
+    #    mode: '0755'
+    #    owner: mooshak
+    #    group: mooshak
+
+    - name: Configure Contest Name
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/.data.tcl
+          regexp: '^(.*)set  Designation(.*)$' 
+          line: set  Designation {{ '{' }}{{title}}{{ '}' }}
+          owner: mooshak
+          group: mooshak
+
+    - name: Configure Contest Description
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/.data.tcl
+          regexp: '^(.*)set        Notes(.*)$' 
+          line: set        Notes {{ '{' }}{{description}}{{ '}' }}
+          owner: mooshak
+          group: mooshak  
+
+    - name: Create Group Folders
+      become: true
+      ansible.builtin.file:
+        path: /home/mooshak/data/contests/contest_template/groups/{{item.group}}
+        state: directory
+        mode: '0755'
+        owner: mooshak
+        group: mooshak
+      loop: "{{teams}}"
+      
+    - name: Create Group Files
+      become: true
+      ansible.builtin.copy:
+        src: /home/pedro/MAAS/backend/terraform_scripts/ansible/group/
+        dest: /home/mooshak/data/contests/contest_template/groups/{{item.group}}/
+        mode: '0644'
+        owner: mooshak
+        group: mooshak
+      loop: "{{teams}}"
+
+    - name: Configure Group Info
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/groups/{{item.group}}/.data.tcl
+          regexp: '^(.*)set  Designation(.*)$' 
+          line: "set  Designation {{item.group}}"
+          owner: mooshak
+          group: mooshak
+      loop: "{{teams}}"
+    
+    - name: Create Team Folders
+      become: true
+      ansible.builtin.file:
+        path: /home/mooshak/data/contests/contest_template/groups/{{item.group}}/{{item.title}}
+        state: directory
+        mode: '0755'
+        owner: mooshak
+        group: mooshak
+      loop: "{{teams}}"
+    
+    - name: Create Team Files
+      become: true
+      ansible.builtin.copy:
+        src: /home/pedro/MAAS/backend/terraform_scripts/ansible/team/
+        dest: /home/mooshak/data/contests/contest_template/groups/{{item.group}}/{{item.title}}
+        mode: '0644'
+        owner: mooshak
+        group: mooshak
+      loop: "{{teams}}"
+
+    - name: Create Team Passwords
+      become: true
+      shell: |
+        cd /home/mooshak/bin
+        ./pass "{{item.mooshak_password}}"
+      loop: "{{teams}}"
+      register: team_passwords
+
+    - name: Configure Team Name
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/groups/{{item.group}}/{{item.title}}/.data.tcl
+          regexp: '^(.*)set         Name(.*)$' 
+          line: "set         Name {{item.title}}"
+          owner: mooshak
+          group: mooshak
+      loop: "{{teams}}"
+      
+    - name: Configure Team Passwords
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/groups/{{item.0.group}}/{{item.0.title}}/.data.tcl
+          regexp: '^(.*)set     Password(.*)$' 
+          line: "set     Password {{item.1.stdout}}"
+          owner: mooshak
+          group: mooshak
+      loop: "{{teams |zip(team_passwords.results)|list}}"
+
+    - name: Configure Team Email
+      become: true
+      ansible.builtin.lineinfile:
+          path: /home/mooshak/data/contests/contest_template/groups/{{item.group}}/{{item.title}}/.data.tcl
+          regexp: '^(.*)set        Email(.*)$' 
+          line: "set        Email {{item.email}}"
+          owner: mooshak
+          group: mooshak
+      loop: "{{teams}}"
+      
+      
+      
+
+
+        
+        
+    
+      
+      
+
+    
+

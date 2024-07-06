@@ -1,0 +1,9 @@
+set        Fatal {}
+set      Warning {}
+set  Designation GroupA
+set      Acronym GroupA
+set        Color Black
+set         Flag 00
+set         Team {}
+set Authentication Basic
+set        Basic {}

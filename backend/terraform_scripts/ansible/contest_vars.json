@@ -1,0 +1,1 @@
+{"title": "T14", "description": "T14 concurs\u00f3\"", "contest_specs": "t2.micro", "admin_password": "pass", "judge_password": "pass", "teams": [{"title": "teamA", "email": "teamA@email.com", "mooshak_password": "haha123", "group": "groupA"}, {"title": "teamB", "email": "teamB@email.com", "mooshak_password": "hehe123", "group": "groupB"}]}

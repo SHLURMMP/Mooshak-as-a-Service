@@ -1,0 +1,8 @@
+- hosts: all
+
+  tasks:
+    - name: Delete Team Folder
+      become: true
+      ansible.builtin.file:
+        path: "/home/mooshak/data/contests/contest_template/groups/{{group}}/{{title}}"
+        state: absent

@@ -1,0 +1,11 @@
+set        Fatal {}
+set      Warning {}
+set         Name {}
+set     Password {}
+set        Email {}
+set     Location {}
+set    Qualifies {}
+set       Person {}
+set        Start {}
+set         Rank {}
+set      Profile team
