@@ -84,9 +84,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'MAASDB',
-        'USER': 'pedroMAAS',
-        'PASSWORD': 'p3dr0m99',
-        'HOST': 'maasdatabase.clfokbee6j6j.eu-west-1.rds.amazonaws.com',
+        'USER': 'user',
+        'PASSWORD': 'password',
+        'HOST': 'aws_db_host',
         'PORT': 3306
 
     }
