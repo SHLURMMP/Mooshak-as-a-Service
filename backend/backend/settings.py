@@ -83,10 +83,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'MAASDB',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'aws_db_host',
+        'NAME': '<DB_NAME>',
+        'USER': '<ADMIN_USERNAME>',
+        'PASSWORD': '<ADMIN_PASSWORD>',
+        'HOST': '<DB_ENDPOINT>',
         'PORT': 3306
 
     }
